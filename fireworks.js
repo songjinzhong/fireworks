@@ -2,6 +2,7 @@
  * fireworks.js
  * author : songjinzhong
  * 2016-11-15
+ * 貌似兼容性有点问题，尽量使用 chrome 查看
  */
 (function (HTMLDE) {
   HTMLDE.prototype.fireworks = function(options) {
@@ -12,6 +13,40 @@
     options.opacity = options.opacity || 1;
     options.width = options.width || '100%';
     options.height = options.height || '100%';
+    options.interval = options.interval || 2000;
+    options.speed = options.speed || 40;
+
+    /*
+     * 获取元素真实 width、height
+     */
+
+    function getStyle(el) { 
+    if(window.getComputedStyle) { 
+      return window.getComputedStyle(el, null); 
+    }else{ 
+      return el.currentStyle; 
+    } 
+    } 
+    function getWH(el, name) { 
+      var val = name === "width" ? el.offsetWidth : el.offsetHeight, 
+      which = name === "width" ? ['Left', 'Right'] : ['Top', 'Bottom']; 
+      // display is none 
+      if(val === 0) { 
+      return 0; 
+      } 
+      var style = getStyle(el); 
+      for(var i = 0, a; a = which[i++];) { 
+      val -= parseFloat( style["border" + a + "Width"]) || 0; 
+      val -= parseFloat( style["padding" + a ] ) || 0; 
+      } 
+      return val; 
+    }
+    if(/%$/.test(options.width)){
+      options.width = getWH(this,'width')*parseFloat(options.width)/100
+    }
+    if(/%$/.test(options.height)){
+      options.height = getWH(this,'height')*parseFloat(options.height)/100
+    }
 
     var fireworksField = this,
         particles = [],
@@ -37,9 +72,6 @@
     canvas.height = SCREEN_HEIGHT;
     canvas.style.width  = SCREEN_WIDTH + 'px';
     canvas.style.height = SCREEN_HEIGHT + 'px';
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0px';
-    canvas.style.left = '0px';
     canvas.style.opacity = options.opacity;
     var context = canvas.getContext('2d');
 
@@ -193,13 +225,6 @@
     };
 
     var loop = function() {
-        // update screen size
-        if (SCREEN_WIDTH != window.innerWidth) {
-            canvas.width = SCREEN_WIDTH = window.innerWidth;
-        }
-        if (SCREEN_HEIGHT != window.innerHeight) {
-            canvas.height = SCREEN_HEIGHT = window.innerHeight;
-        }
 
         // clear canvas
         context.fillStyle = "rgba(0, 0, 0, 0.05)";
@@ -272,7 +297,7 @@
 
     // Append the canvas and start the loops
     this.appendChild(canvas);
-    setInterval(launch, 2000);
-    setInterval(loop, 40);
+    setInterval(launch, options.interval);
+    setInterval(loop, options.speed);
   };
 }(HTMLDivElement));
