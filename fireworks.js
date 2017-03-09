@@ -292,7 +292,9 @@
     };
 
     var launch = function() {
-        launchFrom(SCREEN_WIDTH / 2);
+        if(!document.hidden){
+            launchFrom(SCREEN_WIDTH / 2);
+        }
     };
 
     // Append the canvas and start the loops
